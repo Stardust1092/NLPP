@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>StoryWeaver 架构图</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: "Microsoft YaHei", "Segoe UI", sans-serif;
+    background: #0f1117;
+    color: #e2e8f0;
+    padding: 32px;
+    min-height: 100vh;
+  }
+  h1 {
+    text-align: center;
+    font-size: 22px;
+    color: #f0c040;
+    letter-spacing: 2px;
+    margin-bottom: 6px;
+  }
+  .subtitle {
+    text-align: center;
+    color: #718096;
+    font-size: 13px;
+    margin-bottom: 40px;
+  }
+
+  /* ── 主布局 ── */
+  .diagram {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    position: relative;
+  }
+
+  /* ── GameState 侧边栏 ── */
+  .layout {
+    display: flex;
+    align-items: flex-start;
+    gap: 40px;
+    width: 100%;
+    max-width: 1100px;
+    justify-content: center;
+  }
+  .pipeline { display: flex; flex-direction: column; align-items: center; gap: 0; }
+
+  /* ── 节点卡片 ── */
+  .node {
+    border-radius: 12px;
+    padding: 14px 24px;
+    min-width: 220px;
+    text-align: center;
+    position: relative;
+    border: 2px solid transparent;
+  }
+  .node-title { font-weight: 700; font-size: 15px; margin-bottom: 4px; }
+  .node-sub   { font-size: 11px; opacity: 0.75; line-height: 1.5; }
+  .node-badge {
+    display: inline-block;
+    font-size: 10px;
+    border-radius: 4px;
+    padding: 1px 6px;
+    margin-top: 5px;
+    font-weight: 600;
+  }
+
+  /* 颜色主题 */
+  .intent-node    { background: #1a2744; border-color: #4a7dd4; }
+  .intent-node .node-title { color: #7eb3ff; }
+  .intent-node .node-badge { background: #243358; color: #7eb3ff; }
+
+  .consist-node   { background: #1e2a1e; border-color: #4a9e4a; }
+  .consist-node .node-title { color: #6dbb6d; }
+  .consist-node .node-badge { background: #223022; color: #6dbb6d; }
+
+  .repair-node    { background: #2a1a1a; border-color: #c45a5a; }
+  .repair-node .node-title { color: #e8837f; }
+  .repair-node .node-badge { background: #3a2020; color: #e8837f; }
+
+  .narrator-node  { background: #1e1a2e; border-color: #9168cc; }
+  .narrator-node .node-title { color: #c19ef0; }
+  .narrator-node .node-badge { background: #261d3a; color: #c19ef0; }
+
+  .world-node     { background: #1a2428; border-color: #3a8fa0; }
+  .world-node .node-title { color: #5fcfdf; }
+  .world-node .node-badge { background: #1e2e32; color: #5fcfdf; }
+
+  .choice-node    { background: #26221a; border-color: #c48a2a; }
+  .choice-node .node-title { color: #f0b84a; }
+  .choice-node .node-badge { background: #302812; color: #f0b84a; }
+
+  .io-node {
+    background: #1c1c1c;
+    border-color: #555;
+    border-radius: 24px;
+    padding: 10px 30px;
+  }
+  .io-node .node-title { color: #aaa; font-size: 13px; }
+
+  /* ── 箭头 ── */
+  .arrow {
+    width: 2px;
+    background: #444;
+    height: 28px;
+    position: relative;
+  }
+  .arrow::after {
+    content: "▼";
+    position: absolute;
+    bottom: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #666;
+    font-size: 12px;
+  }
+  .arrow-label {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 10px;
+    color: #718096;
+    white-space: nowrap;
+  }
+
+  /* ── 条件分支区 ── */
+  .branch-area {
+    display: flex;
+    align-items: flex-start;
+    gap: 32px;
+    position: relative;
+    margin: 0;
+  }
+  .branch-line {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+  }
+  .branch-connector {
+    width: 280px;
+    height: 28px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .branch-connector svg {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    overflow: visible;
+  }
+
+  /* ── GameState パネル ── */
+  .state-panel {
+    background: #141820;
+    border: 2px solid #2d3748;
+    border-radius: 12px;
+    padding: 18px;
+    min-width: 220px;
+    max-width: 240px;
+    font-size: 12px;
+    position: sticky;
+    top: 20px;
+    align-self: flex-start;
+    margin-top: 60px;
+  }
+  .state-panel h3 {
+    color: #a0aec0;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+    border-bottom: 1px solid #2d3748;
+    padding-bottom: 8px;
+  }
+  .state-group { margin-bottom: 12px; }
+  .state-group-title {
+    color: #718096;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+  }
+  .state-field {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 2px 0;
+    border-bottom: 1px solid #1a2030;
+    font-size: 11px;
+  }
+  .state-field .key { color: #cbd5e0; }
+  .state-field .val { color: #68d391; font-family: monospace; font-size: 10px; }
+
+  .flow-label {
+    font-size: 10px;
+    color: #718096;
+    background: #141820;
+    border: 1px solid #2d3748;
+    border-radius: 4px;
+    padding: 1px 6px;
+    margin-bottom: 3px;
+  }
+
+  /* ── DeepSeek 标注 ── */
+  .deepseek-label {
+    position: absolute;
+    right: -110px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 10px;
+    color: #f0c040;
+    white-space: nowrap;
+  }
+  .deepseek-label::before {
+    content: "──";
+    color: #3d3020;
+  }
+
+  .node-wrap { position: relative; }
+
+  /* ── 图例 ── */
+  .legend {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    margin-top: 32px;
+    flex-wrap: wrap;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: #a0aec0;
+  }
+  .legend-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+  }
+
+  /* ── 注释区 ── */
+  .notes {
+    max-width: 1100px;
+    margin: 32px auto 0;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+  .note-card {
+    background: #141820;
+    border: 1px solid #2d3748;
+    border-radius: 8px;
+    padding: 14px;
+    font-size: 12px;
+  }
+  .note-card h4 {
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid #2d3748;
+  }
+  .note-card ul { padding-left: 16px; }
+  .note-card li { line-height: 1.8; color: #a0aec0; }
+  .note-card li strong { color: #e2e8f0; }
+</style>
+</head>
+<body>
+
+<h1>StoryWeaver · 多 Agent 架构图</h1>
+<p class="subtitle">COMP5423 · LangGraph 状态机 · 饿殍·明末千里行</p>
+
+<div style="display:flex; justify-content:center;">
+<div class="layout">
+
+  <!-- ── 左侧 GameState ── -->
+  <div class="state-panel">
+    <h3>GameState（共享状态）</h3>
+    <div class="state-group">
+      <div class="state-group-title">输入</div>
+      <div class="state-field"><span class="key">player_input</span><span class="val">str</span></div>
+      <div class="state-field"><span class="key">turn_id</span><span class="val">int</span></div>
+    </div>
+    <div class="state-group">
+      <div class="state-group-title">意图层</div>
+      <div class="state-field"><span class="key">intent</span><span class="val">str</span></div>
+      <div class="state-field"><span class="key">entities</span><span class="val">dict</span></div>
+      <div class="state-field"><span class="key">intent_confidence</span><span class="val">float</span></div>
+    </div>
+    <div class="state-group">
+      <div class="state-group-title">一致性层</div>
+      <div class="state-field"><span class="key">consistency_passed</span><span class="val">bool</span></div>
+      <div class="state-field"><span class="key">consistency_violation</span><span class="val">str</span></div>
+      <div class="state-field"><span class="key">repair_suggestion</span><span class="val">str</span></div>
+    </div>
+    <div class="state-group">
+      <div class="state-group-title">叙事层</div>
+      <div class="state-field"><span class="key">narration</span><span class="val">str</span></div>
+      <div class="state-field"><span class="key">dialogue</span><span class="val">dict</span></div>
+      <div class="state-field"><span class="key">backstory_fragment</span><span class="val">str</span></div>
+      <div class="state-field"><span class="key">state_delta</span><span class="val">dict</span></div>
+    </div>
+    <div class="state-group">
+      <div class="state-group-title">世界状态</div>
+      <div class="state-field"><span class="key">companion_relation</span><span class="val">0–100</span></div>
+      <div class="state-field"><span class="key">reputation</span><span class="val">-50–50</span></div>
+      <div class="state-field"><span class="key">silver</span><span class="val">int</span></div>
+      <div class="state-field"><span class="key">inventory</span><span class="val">list</span></div>
+      <div class="state-field"><span class="key">plot_flags</span><span class="val">dict</span></div>
+      <div class="state-field"><span class="key">npcs_status</span><span class="val">dict</span></div>
+      <div class="state-field"><span class="key">current_act</span><span class="val">1–4</span></div>
+      <div class="state-field"><span class="key">turn_history</span><span class="val">list[-8:]</span></div>
+    </div>
+    <div class="state-group">
+      <div class="state-group-title">输出</div>
+      <div class="state-field"><span class="key">next_choices</span><span class="val">list[str]</span></div>
+      <div class="state-field"><span class="key">agent_logs</span><span class="val">list</span></div>
+    </div>
+  </div>
+
+  <!-- ── 中间 Pipeline ── -->
+  <div class="pipeline">
+
+    <!-- 玩家输入 -->
+    <div class="node-wrap">
+      <div class="node io-node" style="min-width:180px;">
+        <div class="node-title">🎮 玩家输入</div>
+      </div>
+    </div>
+    <div class="arrow" style="height:24px;"></div>
+
+    <!-- IntentAgent -->
+    <div class="node-wrap">
+      <div class="node intent-node">
+        <div class="node-title">IntentAgent</div>
+        <div class="node-sub">意图识别 · 实体抽取</div>
+        <span class="node-badge">NLU</span>
+      </div>
+      <div class="deepseek-label" style="right:-130px;">─── DeepSeek<br><span style="padding-left:16px;color:#a0834a;">（低置信度时）</span></div>
+    </div>
+
+    <!-- 输出说明 -->
+    <div style="display:flex; align-items:center; margin:2px 0;">
+      <div class="arrow" style="height:20px;"></div>
+    </div>
+    <div class="flow-label">intent · entities · confidence</div>
+    <div class="arrow" style="height:10px;"></div>
+
+    <!-- ConsistencyAgent -->
+    <div class="node-wrap">
+      <div class="node consist-node">
+        <div class="node-title">ConsistencyAgent</div>
+        <div class="node-sub">
+          规则①道具存在性<br>
+          规则②穗不能说话<br>
+          规则③NPC存活状态<br>
+          规则④情节标记检查<br>
+          规则⑤金钱充足性
+        </div>
+        <span class="node-badge">5 Rules + LLM</span>
+      </div>
+      <div class="deepseek-label" style="right:-130px;">─── DeepSeek<br><span style="padding-left:16px;color:#a0834a;">（len>8 深层检查）</span></div>
+    </div>
+
+    <div class="arrow" style="height:20px;"></div>
+
+    <!-- 分支 -->
+    <div style="position:relative; width:360px; height:36px; display:flex; align-items:center;">
+      <svg width="360" height="36" style="overflow:visible;">
+        <!-- 中线 -->
+        <line x1="180" y1="0" x2="180" y2="36" stroke="#444" stroke-width="1.5"/>
+        <!-- 左分支 (FAIL → repair) -->
+        <line x1="180" y1="18" x2="80"  y2="18" stroke="#c45a5a" stroke-width="1.5" stroke-dasharray="4,3"/>
+        <line x1="80"  y1="18" x2="80"  y2="36" stroke="#c45a5a" stroke-width="1.5" stroke-dasharray="4,3"/>
+        <text x="118" y="14" fill="#c45a5a" font-size="10">FAIL</text>
+        <!-- 右干路 (PASS → narrator) -->
+        <text x="185" y="14" fill="#6dbb6d" font-size="10">PASS</text>
+      </svg>
+    </div>
+
+    <!-- 分支并列区 -->
+    <div class="branch-area" style="align-items:flex-start; gap:10px;">
+
+      <!-- 左：Repair -->
+      <div class="branch-line" style="width:160px;">
+        <div class="node repair-node" style="min-width:155px;">
+          <div class="node-title">RepairAgent</div>
+          <div class="node-sub">生成叙事化拒绝旁白<br>不改变世界状态</div>
+          <span class="node-badge">DeepSeek</span>
+        </div>
+        <!-- repair → narrator 的向右箭头 -->
+        <div style="display:flex;align-items:center;margin-top:12px;width:100%;justify-content:flex-end;">
+          <div style="font-size:10px;color:#c45a5a;margin-right:6px;">narration↓</div>
+        </div>
+        <!-- 竖线连到narrator -->
+        <svg width="160" height="60" style="overflow:visible;">
+          <line x1="80" y1="0" x2="80" y2="30" stroke="#c45a5a" stroke-width="1.5" stroke-dasharray="4,3"/>
+          <line x1="80" y1="30" x2="220" y2="30" stroke="#c45a5a" stroke-width="1.5" stroke-dasharray="4,3"/>
+          <polygon points="220,26 220,34 230,30" fill="#c45a5a"/>
+        </svg>
+      </div>
+
+      <!-- 右：Narrator -->
+      <div class="branch-line" style="width:220px; margin-top:0;">
+        <div class="node narrator-node" style="min-width:215px;">
+          <div class="node-title">NarratorAgent</div>
+          <div class="node-sub">
+            system: WORLD_SYSTEM_PROMPT<br>
+            生成旁白 · 对话 · 暗线碎片<br>
+            输出 state_delta
+          </div>
+          <span class="node-badge">DeepSeek · max_tokens=900</span>
+        </div>
+      </div>
+    </div>
+
+    <div style="height:8px;"></div>
+    <div class="flow-label">narration · dialogue · backstory · state_delta</div>
+    <div class="arrow" style="height:10px;"></div>
+
+    <!-- WorldAgent -->
+    <div class="node-wrap">
+      <div class="node world-node">
+        <div class="node-title">WorldAgent</div>
+        <div class="node-sub">
+          应用 state_delta<br>
+          更新数值 / 道具 / 地点 / NPC<br>
+          检测幕次切换（华州→阌乡→崤山→洛阳）<br>
+          追加 turn_history（保留最近8轮）
+        </div>
+        <span class="node-badge">纯规则 · 无 LLM</span>
+      </div>
+    </div>
+
+    <div class="arrow" style="height:16px;"></div>
+    <div class="flow-label">更新后 GameState</div>
+    <div class="arrow" style="height:10px;"></div>
+
+    <!-- ChoiceAgent -->
+    <div class="node-wrap">
+      <div class="node choice-node">
+        <div class="node-title">ChoiceAgent</div>
+        <div class="node-sub">
+          生成 3–4 个差异化选项<br>
+          依据：当前地点 · 信任度 · 背包 · plot_flags<br>
+          避免与上轮选项重复
+        </div>
+        <span class="node-badge">DeepSeek · temp=1.0</span>
+      </div>
+    </div>
+
+    <div class="arrow" style="height:24px;"></div>
+
+    <!-- 输出 -->
+    <div class="node io-node" style="min-width:280px; padding:14px 24px;">
+      <div class="node-title" style="color:#e2e8f0;">📜 叙事输出 + 选项</div>
+      <div class="node-sub" style="margin-top:6px; color:#718096;">
+        narration &nbsp;·&nbsp; dialogue &nbsp;·&nbsp; backstory<br>
+        next_choices &nbsp;·&nbsp; state_delta &nbsp;·&nbsp; agent_logs
+      </div>
+    </div>
+
+  </div><!-- /pipeline -->
+
+  <!-- ── 右侧路线图 ── -->
+  <div class="state-panel" style="margin-top:60px;">
+    <h3>故事路线</h3>
+    <div style="font-size:12px; line-height:2;">
+      <div style="color:#f0c040; margin-bottom:8px; font-weight:600;">四幕路线</div>
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+        <div style="background:#1a2744;border:1px solid #4a7dd4;border-radius:4px;padding:2px 8px;font-size:11px;color:#7eb3ff;">Act 1</div>
+        <span style="color:#a0aec0;">华州</span>
+      </div>
+      <div style="color:#444; text-align:center; font-size:16px; margin:-2px 0;">↓</div>
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+        <div style="background:#1e2a1e;border:1px solid #4a9e4a;border-radius:4px;padding:2px 8px;font-size:11px;color:#6dbb6d;">Act 2</div>
+        <span style="color:#a0aec0;">阌乡</span>
+      </div>
+      <div style="color:#444; text-align:center; font-size:16px; margin:-2px 0;">↓</div>
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+        <div style="background:#1e1a2e;border:1px solid #9168cc;border-radius:4px;padding:2px 8px;font-size:11px;color:#c19ef0;">Act 3</div>
+        <span style="color:#a0aec0;">崤山</span>
+      </div>
+      <div style="color:#444; text-align:center; font-size:16px; margin:-2px 0;">↓</div>
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+        <div style="background:#26221a;border:1px solid #c48a2a;border-radius:4px;padding:2px 8px;font-size:11px;color:#f0b84a;">Act 4</div>
+        <span style="color:#a0aec0;">洛阳</span>
+      </div>
+    </div>
+
+    <div style="margin-top:20px;">
+      <div style="color:#f0c040; margin-bottom:8px; font-weight:600; font-size:12px;">核心人物</div>
+      <div style="font-size:11px; line-height:2; color:#a0aec0;">
+        <div><span style="color:#c19ef0;">良</span> — 主角（玩家扮演）</div>
+        <div><span style="color:#c19ef0;">穗</span> — 哑女同伴（布条交流）</div>
+        <div><span style="color:#e8837f;">舌头</span> — NPC向导</div>
+      </div>
+    </div>
+
+    <div style="margin-top:20px;">
+      <div style="color:#f0c040; margin-bottom:8px; font-weight:600; font-size:12px;">关键指标</div>
+      <div style="font-size:11px; line-height:2; color:#a0aec0;">
+        <div>companion_relation → 结局分支</div>
+        <div>reputation → NPC态度</div>
+        <div>plot_flags → 剧情解锁</div>
+      </div>
+    </div>
+
+    <div style="margin-top:20px;">
+      <div style="color:#f0c040; margin-bottom:8px; font-weight:600; font-size:12px;">意图分类（11种）</div>
+      <div style="font-size:10px; line-height:1.9; color:#a0aec0; display:grid; grid-template-columns:1fr 1fr; gap:0;">
+        <span>PROTECT</span><span>NEGOTIATE</span>
+        <span>INVESTIGATE</span><span>HELP</span>
+        <span>DECEIVE</span><span>FLEE</span>
+        <span>REST</span><span>ASK</span>
+        <span>USE_ITEM</span><span>BRIBE</span>
+        <span>FIGHT</span><span style="color:#555;">OTHER</span>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /layout -->
+</div>
+
+<!-- ── 图例 ── -->
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot" style="background:#4a7dd4;"></div>规则层优先（关键词加权）</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#f0c040;"></div>DeepSeek LLM 调用</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#3a8fa0;"></div>纯规则，无 LLM</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#c45a5a;"></div>一致性修复路径（FAIL）</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#4a9e4a;"></div>正常叙事路径（PASS）</div>
+</div>
+
+<!-- ── 注释卡片 ── -->
+<div class="notes">
+
+  <div class="note-card">
+    <h4 style="color:#7eb3ff;">IntentAgent — NLU</h4>
+    <ul>
+      <li><strong>规则层</strong>：关键词长度加权评分</li>
+      <li><strong>LLM层</strong>：DeepSeek JSON分类（低置信度时）</li>
+      <li><strong>实体抽取</strong>：NPC / 地点 / 道具</li>
+      <li>准确率 <strong>100%</strong>（20/20 测试集）</li>
+      <li>0 LLM fallbacks on labeled set</li>
+    </ul>
+  </div>
+
+  <div class="note-card">
+    <h4 style="color:#6dbb6d;">ConsistencyAgent — 世界守卫</h4>
+    <ul>
+      <li><strong>规则①</strong>：USE_ITEM 道具必须在背包</li>
+      <li><strong>规则②</strong>：穗不能开口说话</li>
+      <li><strong>规则③</strong>：NPC 必须存活且在场</li>
+      <li><strong>规则④</strong>：知晓豚妖前不可提及</li>
+      <li><strong>规则⑤</strong>：贿赂需有铜钱</li>
+      <li>准确率 <strong>100%</strong>（8/8 测试集）</li>
+    </ul>
+  </div>
+
+  <div class="note-card">
+    <h4 style="color:#e8837f;">RepairAgent — 叙事修复</h4>
+    <ul>
+      <li>被一致性检查 <strong>FAIL</strong> 时触发</li>
+      <li>生成<strong>叙事化拒绝</strong>，不暴露系统错误</li>
+      <li><strong>state_delta = &#123;&#125;</strong> 修复回合不改变状态</li>
+      <li>修复后仍走 Narrator → World → Choice</li>
+    </ul>
+  </div>
+
+  <div class="note-card">
+    <h4 style="color:#c19ef0;">NarratorAgent — 核心叙事</h4>
+    <ul>
+      <li>system prompt 注入完整世界观设定</li>
+      <li>输出：<strong>旁白 · 对话 · 暗线碎片 · state_delta</strong></li>
+      <li>state_delta 包含数值变化 / 道具增减 / NPC更新</li>
+      <li>max_tokens=900，temperature=0.85</li>
+    </ul>
+  </div>
+
+  <div class="note-card">
+    <h4 style="color:#5fcfdf;">WorldAgent — 状态同步</h4>
+    <ul>
+      <li><strong>纯规则</strong>，零 LLM 调用（确定性）</li>
+      <li>应用 NarratorAgent 输出的 state_delta</li>
+      <li>检测地点变化 → <strong>自动幕次切换</strong></li>
+      <li>turn_history 滑动窗口（最近 8 轮）</li>
+      <li>数值边界：relation 0–100，rep -50–50</li>
+    </ul>
+  </div>
+
+  <div class="note-card">
+    <h4 style="color:#f0b84a;">ChoiceAgent — 选项生成</h4>
+    <ul>
+      <li>生成 3–4 个<strong>方向各异</strong>的行动选项</li>
+      <li>输入：地点 · 信任度 · 背包 · plot_flags</li>
+      <li>避免与上轮选项重复</li>
+      <li>选项差异度评估 <strong>0.986</strong>（目标≥0.4）</li>
+      <li>temperature=1.0（高创意度）</li>
+    </ul>
+  </div>
+
+</div>
+
+<div style="text-align:center; margin-top:32px; font-size:11px; color:#4a5568;">
+  LangGraph StateGraph · 6 nodes · GameState TypedDict · DeepSeek API (deepseek-chat)
+</div>
+
+</body>
+</html>

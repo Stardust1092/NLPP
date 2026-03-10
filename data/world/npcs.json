@@ -1,0 +1,110 @@
+{
+  "穗": {
+    "id": "sui",
+    "name": "穗",
+    "age": 9,
+    "gender": "female",
+    "can_speak": false,
+    "description": "九岁哑女，眼神深邃沉静，不哭也不笑，只静静观察一切。以布条书字传情，字迹工整，远超寻常孩子。",
+    "backstory": "来自洛阳，妹妹被千年豚妖所害。她故意将自己卖入人贩商队，目的是接近豚妖，借良之手为妹妹及众多受害女童复仇。她知道自己此行的命运，却仍选择走下去。",
+    "initial_location": "华州·破旧客栈",
+    "initial_relation": 20,
+    "relation_events": {
+      "protect_girls": 8,
+      "share_food": 6,
+      "help_weak": 10,
+      "betray_trust": -20,
+      "lie_to_sui": -15,
+      "abandon_weak": -12,
+      "show_kindness": 5,
+      "greed_shown": -8
+    },
+    "speech_style": "布条传字，言简意赅，有时只写一个字或画一个简单图案",
+    "reveal_threshold": {
+      "low": 0,
+      "medium": 40,
+      "high": 70
+    },
+    "reveals_at_high": [
+      "穗在布条上写道：我来洛阳，不是为了被卖。",
+      "穗写下：那个人……不是人。",
+      "穗将一小块碎玉递给你，上面刻着福王府的纹样。"
+    ]
+  },
+  "舌头": {
+    "id": "tongue",
+    "name": "舌头",
+    "age": 30,
+    "gender": "male",
+    "can_speak": true,
+    "description": "良的同伴，能言善辩，见人说人话见鬼说鬼话。贪财好利，却有自己的底线，对良有三年袍泽之情。",
+    "backstory": "江湖老手，跟了良三年，做过许多灰色买卖。内心并非全无良知，但总把利益摆在前面。",
+    "initial_location": "华州·破旧客栈",
+    "initial_relation": 70,
+    "speech_style": "话多油滑，善于圆场，偶有真心话从玩笑里漏出",
+    "key_quotes": [
+      "良兄弟，咱做的是护送的活计，又不是行善积德，别想太多。",
+      "这几个娃娃……我看着心里也怪不是滋味的。",
+      "到了洛阳，拿了钱，各奔东西，这就是江湖。"
+    ]
+  },
+  "花儿": {
+    "id": "hua",
+    "name": "花儿",
+    "age": 7,
+    "gender": "female",
+    "can_speak": true,
+    "description": "七岁，机灵活泼，是四个孩子里最爱说话的，时常安慰哭泣的月儿。",
+    "initial_location": "华州·破旧客栈",
+    "initial_relation": 30,
+    "speech_style": "童声稚嫩，有时说出出乎意料的懂事话"
+  },
+  "月儿": {
+    "id": "yue",
+    "name": "月儿",
+    "age": 6,
+    "gender": "female",
+    "can_speak": true,
+    "description": "六岁，胆小怕事，常常以泪洗面，反复念叨着要回家找阿娘。",
+    "initial_location": "华州·破旧客栈",
+    "initial_relation": 30,
+    "speech_style": "哭泣声居多，偶尔问：我们去哪里？阿娘在哪里？"
+  },
+  "冬梅": {
+    "id": "dongmei",
+    "name": "冬梅",
+    "age": 8,
+    "gender": "female",
+    "can_speak": true,
+    "description": "八岁，沉默，眼神空洞，不哭也不闹，似乎已对命运不再抱有期待。",
+    "initial_location": "华州·破旧客栈",
+    "initial_relation": 20,
+    "speech_style": "极少开口，偶尔说出让人心惊的话，如：反正去哪都一样。"
+  },
+  "托主": {
+    "id": "client",
+    "name": "托主",
+    "age": 45,
+    "gender": "male",
+    "can_speak": true,
+    "description": "神情阴郁的中年男人，代替真正的买主出面交付定金。他只是个传话人，对真正的买主所知甚少，或者是故意装作不知。",
+    "initial_location": "华州·破旧客栈",
+    "initial_relation": 10,
+    "speech_style": "言语简短，不多作解释，留下定金后便迅速离开",
+    "appears_in_act": 1
+  },
+  "豚妖": {
+    "id": "pig_demon",
+    "name": "豚妖",
+    "age_human": 50,
+    "true_age": 1000,
+    "gender": "male",
+    "can_speak": true,
+    "description": "千年修行的豚妖，化作洛阳城中富贵人家老爷模样，温文儒雅，实则以食幼女精元维持修为。真身藏于福王府附近宅邸。",
+    "initial_location": "洛阳·福王府附近",
+    "initially_visible": false,
+    "appears_in_act": 4,
+    "knows_pig_demon_required": true,
+    "speech_style": "彬彬有礼，笑里藏刀，说话滴水不漏"
+  }
+}

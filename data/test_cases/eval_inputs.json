@@ -1,0 +1,166 @@
+{
+  "intent_cases": [
+    {"input": "蹲下来看看穗的眼神，向她点头示意",            "expected_intent": "NEGOTIATE"},
+    {"input": "把仅剩的一块干粮分给正在哭泣的月儿",          "expected_intent": "HELP"},
+    {"input": "摸出匕首，挡在孩子们前面",                   "expected_intent": "PROTECT"},
+    {"input": "向客栈掌柜打听洛阳方向的消息",               "expected_intent": "ASK"},
+    {"input": "趁黑摸走流民堆里的粮袋",                    "expected_intent": "INVESTIGATE"},
+    {"input": "假称自己是官府押解人员，强行通过关卡",         "expected_intent": "DECEIVE"},
+    {"input": "抓起舌头的衣领，质问他到底知道什么",          "expected_intent": "NEGOTIATE"},
+    {"input": "带着孩子们撒腿往山里跑",                    "expected_intent": "FLEE"},
+    {"input": "拿出委托书，再仔细看看那模糊的印鉴",          "expected_intent": "INVESTIGATE"},
+    {"input": "往官兵手里塞了几枚铜钱，请他行个方便",        "expected_intent": "BRIBE"},
+    {"input": "亮出腰间短刀，逼退来犯的流寇",              "expected_intent": "FIGHT"},
+    {"input": "找棵大树靠着，闭目养神片刻",                "expected_intent": "REST"},
+    {"input": "取出药材，给受伤的冬梅包扎伤口",            "expected_intent": "USE_ITEM"},
+    {"input": "用剩余的干粮换取向导带路",                  "expected_intent": "NEGOTIATE"},
+    {"input": "护住穗，挡在官兵与她之间",                  "expected_intent": "PROTECT"},
+    {"input": "偷偷打量那神秘托主留下的货物",              "expected_intent": "INVESTIGATE"},
+    {"input": "在渡口码头四处张望，寻找义军踪迹",          "expected_intent": "INVESTIGATE"},
+    {"input": "向路边的难民老人询问崤山的路况",            "expected_intent": "ASK"},
+    {"input": "拉着舌头悄声商议，说要另寻买主",            "expected_intent": "NEGOTIATE"},
+    {"input": "带孩子们找一处废弃屋舍过夜",               "expected_intent": "REST"}
+  ],
+
+  "consistency_cases": [
+    {
+      "input": "取出匕首，递给穗防身",
+      "expected_passed": false,
+      "setup_state": {
+        "inventory": ["干粮×2", "委托书"],
+        "npcs_status": {"穗": {"alive": true, "location": "华州·破旧客栈"}},
+        "plot_flags": {"knows_pig_demon": false},
+        "player_location": "华州·破旧客栈",
+        "companion_relation": 30,
+        "silver": 15
+      },
+      "note": "背包中没有匕首"
+    },
+    {
+      "input": "穗说：我要去找豚妖报仇",
+      "expected_passed": false,
+      "setup_state": {
+        "inventory": ["干粮×2"],
+        "npcs_status": {"穗": {"alive": true, "location": "华州·破旧客栈"}},
+        "plot_flags": {"knows_pig_demon": false},
+        "player_location": "华州·破旧客栈",
+        "companion_relation": 50,
+        "silver": 15
+      },
+      "note": "穗是哑女，不能开口说话"
+    },
+    {
+      "input": "去找豚妖谈判，要它放了孩子们",
+      "expected_passed": false,
+      "setup_state": {
+        "inventory": ["干粮×2"],
+        "npcs_status": {},
+        "plot_flags": {"knows_pig_demon": false},
+        "player_location": "华州·破旧客栈",
+        "companion_relation": 20,
+        "silver": 15
+      },
+      "note": "玩家尚不知晓豚妖存在"
+    },
+    {
+      "input": "用铜钱贿赂渡口官兵",
+      "expected_passed": false,
+      "setup_state": {
+        "inventory": ["干粮×2"],
+        "npcs_status": {},
+        "plot_flags": {},
+        "player_location": "阌乡·渡口",
+        "companion_relation": 40,
+        "silver": 0
+      },
+      "note": "银钱为0，无从贿赂"
+    },
+    {
+      "input": "把干粮分给路边的孩子",
+      "expected_passed": true,
+      "setup_state": {
+        "inventory": ["干粮×2", "委托书"],
+        "npcs_status": {},
+        "plot_flags": {},
+        "player_location": "华州·城外",
+        "companion_relation": 30,
+        "silver": 15
+      },
+      "note": "背包有干粮，行动合理"
+    },
+    {
+      "input": "向穗递去一个安慰的眼神",
+      "expected_passed": true,
+      "setup_state": {
+        "inventory": ["干粮×2"],
+        "npcs_status": {"穗": {"alive": true, "location": "华州·破旧客栈"}},
+        "plot_flags": {},
+        "player_location": "华州·破旧客栈",
+        "companion_relation": 20,
+        "silver": 15
+      },
+      "note": "与在场角色互动，合理"
+    },
+    {
+      "input": "向冬梅问路",
+      "expected_passed": false,
+      "setup_state": {
+        "inventory": [],
+        "npcs_status": {"冬梅": {"alive": false, "location": ""}},
+        "plot_flags": {},
+        "player_location": "崤山·官道",
+        "companion_relation": 50,
+        "silver": 10
+      },
+      "note": "冬梅已不在人世"
+    },
+    {
+      "input": "带着孩子们向渡口走去",
+      "expected_passed": true,
+      "setup_state": {
+        "inventory": ["干粮×1"],
+        "npcs_status": {},
+        "plot_flags": {},
+        "player_location": "阌乡",
+        "companion_relation": 40,
+        "silver": 8
+      },
+      "note": "合理的移动行为"
+    }
+  ],
+
+  "flow_cases": [
+    {
+      "input": "蹲下来，平视穗，向她轻轻点头",
+      "setup_steps": []
+    },
+    {
+      "input": "取出委托书，借着油灯细看那模糊的印鉴",
+      "setup_steps": []
+    },
+    {
+      "input": "走出客栈，在流民堆里打听去洛阳的路况",
+      "setup_steps": []
+    },
+    {
+      "input": "把手边的干粮掰开，悄悄分给正在哭泣的月儿",
+      "setup_steps": []
+    },
+    {
+      "input": "找舌头坐下，压低声音问他：接这趟活之前，你打探到什么没有？",
+      "setup_steps": []
+    },
+    {
+      "input": "护在穗前面，挡住客栈里几个贼眉鼠眼的汉子的目光",
+      "setup_steps": ["蹲下来，平视穗，向她轻轻点头"]
+    },
+    {
+      "input": "向过路商队打探阌乡渡口的官兵盘查是否严格",
+      "setup_steps": ["走出客栈，在流民堆里打听去洛阳的路况"]
+    },
+    {
+      "input": "在崤山密林中埋伏，观察那队官兵的动向",
+      "setup_steps": ["取出委托书，借着油灯细看那模糊的印鉴"]
+    }
+  ]
+}

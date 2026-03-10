@@ -1,0 +1,64 @@
+{
+  "干粮": {
+    "id": "food",
+    "name": "干粮",
+    "description": "几块炒熟的杂粮饼，硬邦邦的，但在这乱世已是难得之物。",
+    "usable": true,
+    "use_effect": "补充体力，亦可分与他人，增加好感度",
+    "companion_relation_change": 6
+  },
+  "碎银": {
+    "id": "silver",
+    "name": "碎银",
+    "description": "零散的银角子，够在普通客栈住几晚。",
+    "usable": true,
+    "use_effect": "可用于贿赂、购买物资或打点关系",
+    "silver_value": 10
+  },
+  "委托书": {
+    "id": "mission_letter",
+    "name": "委托书",
+    "description": "托主留下的护送契约，写明将四名女童安全护送至洛阳某处，酬劳丰厚。落款处的印鉴模糊不清。",
+    "usable": false,
+    "clue_level": 1
+  },
+  "穗的布条": {
+    "id": "sui_cloth",
+    "name": "穗的布条",
+    "description": "穗递给你的一条写满小字的布帛，是她无法开口时唯一的表达方式。",
+    "usable": false,
+    "clue_level": 2,
+    "obtained_from": "穗",
+    "requires_relation": 40
+  },
+  "碎玉牌": {
+    "id": "jade_token",
+    "name": "碎玉牌",
+    "description": "一块残缺的玉牌，上面刻有隐约可辨的纹样，像是某个大户人家的标记。穗随身带着它。",
+    "usable": false,
+    "clue_level": 3,
+    "obtained_from": "穗",
+    "requires_relation": 70
+  },
+  "匕首": {
+    "id": "dagger",
+    "name": "匕首",
+    "description": "一把制作粗陋的短刃，在危急时刻或许能救命，也可能带来更大的麻烦。",
+    "usable": true,
+    "use_effect": "用于战斗或威胁，使用后reputation_change: -5"
+  },
+  "药材": {
+    "id": "herbs",
+    "name": "药材",
+    "description": "几束晒干的草药，可治伤口感染，路上若有人受伤或染病能派上用场。",
+    "usable": true,
+    "use_effect": "治疗伤病，companion_relation_change: +5"
+  },
+  "通关文牒": {
+    "id": "travel_permit",
+    "name": "通关文牒",
+    "description": "一张官府颁发的通行证明，可在关卡处减少盘查麻烦，但其真实性……颇为存疑。",
+    "usable": true,
+    "use_effect": "通过关卡时减少麻烦，reputation_change: +0"
+  }
+}
