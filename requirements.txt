@@ -1,8 +1,7 @@
+# ── 核心依赖（Vercel Serverless + 本地均需要）──────────────
 langgraph>=0.2.0
 langchain-core>=0.2.0
 openai>=1.0.0
-gradio>=4.44.0
 pydantic>=2.0.0
 python-dotenv>=1.0.0
-nltk>=3.8.0
-pandas>=2.0.0
+# ── 本地 UI 与评估工具见 requirements-dev.txt ──────────────

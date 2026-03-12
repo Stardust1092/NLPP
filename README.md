@@ -93,8 +93,8 @@ python -m venv .venv
 python3 -m venv .venv
 source .venv/bin/activate
 
-# 安装依赖
-pip install -r requirements.txt
+# 安装依赖（本地开发需要完整依赖）
+pip install -r requirements-dev.txt
 ```
 
 ### 3. 配置 API Key
@@ -175,6 +175,8 @@ vercel --prod
 | 组件 | 说明 |
 |------|------|
 | `vercel.json` | Vercel 部署配置（路由、函数超时等） |
+| `runtime.txt` | 指定 Python 运行时版本（3.12） |
+| `requirements.txt` | Serverless Function 核心依赖（不含 gradio/nltk/pandas） |
 | `api/new_game.py` | Serverless Function — 初始化新游戏 |
 | `api/step.py` | Serverless Function — 处理每回合玩家输入 |
 | `public/index.html` | 静态前端（明末卷轴风 UI） |
@@ -239,7 +241,9 @@ StoryWeaver/
 │
 ├── architecture.html          # 可视化架构图（浏览器打开）
 ├── vercel.json                # Vercel 部署配置
-├── requirements.txt
+├── runtime.txt                # Vercel Python 版本（3.12）
+├── requirements.txt           # 核心依赖（Vercel 使用）
+├── requirements-dev.txt       # 完整开发依赖（本地 UI + 评估）
 ├── .env.example               # API Key 配置模板
 └── README.md
 ```
