@@ -64,7 +64,7 @@ body,html{background:#0d0904;color:#ead8a8;font-family:'KaiTi','STKaiti','SimSun
   font-family:'KaiTi','STKaiti','SimSun',serif;font-size:0.93em;
   text-align:left;padding:10px 16px;min-height:54px;line-height:1.55;
   cursor:pointer;transition:all 0.15s ease;box-shadow:inset 0 1px 0 rgba(255,255,255,0.04);
-  white-space:normal;word-break:break-all;
+  white-space:normal;overflow-wrap:break-word;
 }
 .choice-btn:hover{
   background:linear-gradient(180deg,#3a2a10 0%,#2c2010 100%);
@@ -400,9 +400,9 @@ async function handleChoice(choiceText) {
     // 检查是否有新地点 → 显示幕次标题
     const delta = result.state_delta || {};
     if (delta.new_location && gameState) {
-      const act = gameState.current_act || 1;
+      const actNumber = gameState.current_act || 1;
       const actNames = {1:'华州', 2:'阌乡', 3:'崤山', 4:'洛阳'};
-      storyTurns.push('<div class="act-title">═══ 第' + act + '幕 · ' + (actNames[act]||'') + ' ═══</div>');
+      storyTurns.push('<div class="act-title">═══ 第' + actNumber + '幕 · ' + (actNames[actNumber]||'') + ' ═══</div>');
     }
 
     storyTurns.push(formatTurn(choiceText, result));
