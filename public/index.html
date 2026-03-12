@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StoryWeaver · 明末千里行</title>
+<style>
+/* ── 重置 & 全局 ───────────────────────────────────────── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body,html{background:#0d0904;color:#ead8a8;font-family:'KaiTi','STKaiti','SimSun',serif;min-height:100vh}
+
+/* ── 容器 ──────────────────────────────────────────────── */
+.container{width:100%;max-width:1200px;margin:0 auto;padding:0 12px}
+
+/* ── 标题区 ────────────────────────────────────────────── */
+.app-header{
+  background:linear-gradient(180deg,#1e1208 0%,#120c05 100%);
+  border-bottom:2px solid #6a4812;
+  padding:20px 0 14px;text-align:center;margin-bottom:16px;
+}
+.app-header h1{
+  color:#e8c860;font-size:2.0em;margin:0;letter-spacing:6px;
+  text-shadow:0 0 16px rgba(220,180,60,0.4);
+}
+.app-header p{color:#907850;font-size:0.85em;margin:6px 0 0;letter-spacing:1px}
+
+/* ── 主布局 ────────────────────────────────────────────── */
+.main-layout{display:flex;gap:16px;align-items:flex-start}
+.story-col{flex:3;min-width:0}
+.status-col{flex:1;min-width:220px}
+
+/* ── 故事卷轴区 ────────────────────────────────────────── */
+.story-box{
+  font-family:'KaiTi','STKaiti','SimSun',serif;line-height:2.1;
+  background:linear-gradient(160deg,#3a2510 0%,#2c1c0a 50%,#301e0c 100%);
+  color:#ead8a8;padding:28px 36px;border-radius:4px;
+  border-top:3px solid #9a6a20;border-left:4px solid #7a5018;
+  border-right:1px solid #4a3010;border-bottom:1px solid #4a3010;
+  min-height:520px;max-height:580px;overflow-y:auto;font-size:15px;
+  box-shadow:inset 3px 0 14px rgba(0,0,0,0.35),0 4px 20px rgba(0,0,0,0.5);
+  scroll-behavior:smooth;
+}
+.story-box::-webkit-scrollbar{width:5px}
+.story-box::-webkit-scrollbar-track{background:#0d0804}
+.story-box::-webkit-scrollbar-thumb{background:linear-gradient(180deg,#6a4012,#3a2208);border-radius:2px}
+
+/* ── 叙事文本块 ────────────────────────────────────────── */
+.narration-block{color:#f0deb8;margin-bottom:12px;text-indent:2em;letter-spacing:0.06em;text-shadow:0 1px 2px rgba(0,0,0,0.4)}
+.dialogue-line{color:#eec868;padding:7px 18px;border-left:3px solid #8a6020;margin:10px 0;background:rgba(138,96,32,0.10);border-radius:0 4px 4px 0;letter-spacing:0.04em}
+.speaker-name{color:#f8d870;font-weight:bold;letter-spacing:0.12em;margin-right:3px}
+.backstory-block{color:#c0a0e0;background:rgba(80,40,140,0.14);padding:12px 20px;border-left:3px solid #6040a8;margin:14px 0;border-radius:0 6px 6px 0;font-style:italic;letter-spacing:0.05em;line-height:1.9}
+.player-action{color:#7090b8;font-size:0.88em;margin-bottom:10px;padding-bottom:7px;border-bottom:1px dashed #243448;letter-spacing:0.12em}
+.act-title{color:#d4a828;font-size:0.96em;letter-spacing:5px;text-align:center;margin:20px 0 22px;padding:8px 0;border-top:1px solid #382810;border-bottom:1px solid #382810;text-shadow:0 0 10px rgba(200,155,40,0.35)}
+.repair-note{color:#d08080;font-size:0.86em;background:rgba(150,50,50,0.12);padding:8px 14px;border:1px solid rgba(150,60,60,0.22);border-radius:4px;margin:8px 0}
+.turn-divider{border:none;border-top:1px dashed #261a08;margin:18px 0}
+.empty-hint{color:#c8a858;text-align:center;padding-top:180px;font-size:1.1em;letter-spacing:3px;line-height:2.8;text-shadow:0 1px 4px rgba(0,0,0,0.6)}
+
+/* ── 选项按钮区 ────────────────────────────────────────── */
+.choice-label{color:#7a6030;font-size:0.82em;letter-spacing:2px;margin:12px 0 6px;padding-left:10px;border-left:2px solid #5a3c18}
+.choice-row{display:flex;gap:8px;margin-bottom:6px}
+.choice-btn{
+  flex:1;background:linear-gradient(180deg,#2c1e0c 0%,#1e1408 100%);
+  color:#d4b060;border:1px solid #4e3414;border-bottom-width:2px;border-radius:2px;
+  font-family:'KaiTi','STKaiti','SimSun',serif;font-size:0.93em;
+  text-align:left;padding:10px 16px;min-height:54px;line-height:1.55;
+  cursor:pointer;transition:all 0.15s ease;box-shadow:inset 0 1px 0 rgba(255,255,255,0.04);
+  white-space:normal;overflow-wrap:break-word;
+}
+.choice-btn:hover{
+  background:linear-gradient(180deg,#3a2a10 0%,#2c2010 100%);
+  color:#f0d060;border-color:#8a6020;transform:translateX(3px);
+  box-shadow:-3px 0 8px rgba(170,110,20,0.22);
+}
+.choice-btn:disabled{opacity:0.4;cursor:not-allowed;transform:none}
+
+/* ── 自由输入区 ────────────────────────────────────────── */
+.free-input-row{display:flex;gap:8px;margin-top:8px}
+.free-input{
+  flex:5;background:#1a1208;color:#d8c898;border:1px solid #4a3018;border-radius:2px;
+  font-family:'KaiTi','STKaiti','SimSun',serif;font-size:0.95em;padding:10px 14px;
+  outline:none;
+}
+.free-input:focus{border-color:#7a5020;box-shadow:0 0 6px rgba(180,120,40,0.2)}
+.free-input::placeholder{color:#5a4828}
+
+.submit-btn{
+  flex:1;background:linear-gradient(180deg,#5c3010 0%,#401e08 100%);
+  color:#f0d870;border:1px solid #7a4818;border-radius:2px;
+  font-family:'KaiTi','STKaiti','SimSun',serif;font-size:0.95em;
+  cursor:pointer;padding:10px 16px;
+}
+.submit-btn:hover{background:linear-gradient(180deg,#6a3814 0%,#4c2610 100%);box-shadow:0 0 8px rgba(180,110,30,0.25)}
+.submit-btn:disabled{opacity:0.4;cursor:not-allowed}
+
+/* ── 新游戏按钮 ────────────────────────────────────────── */
+.new-game-btn{
+  width:100%;background:linear-gradient(180deg,#6a3810 0%,#4a2408 100%);
+  color:#f5e080;border:1px solid #8a4e1a;border-radius:2px;
+  font-family:'KaiTi','STKaiti','SimSun',serif;font-size:1.02em;
+  letter-spacing:2px;padding:10px;cursor:pointer;
+}
+.new-game-btn:hover{background:linear-gradient(180deg,#7a4818 0%,#5a2e10 100%);box-shadow:0 0 14px rgba(200,130,40,0.28)}
+.new-game-btn:disabled{opacity:0.4;cursor:not-allowed}
+
+/* ── 状态面板 ──────────────────────────────────────────── */
+.status-panel{
+  background:linear-gradient(180deg,#1a1008 0%,#120c06 100%);
+  border:1px solid #332210;border-left:3px solid #6a4012;border-radius:2px;
+  padding:18px 16px;min-height:380px;
+  box-shadow:inset 0 0 30px rgba(0,0,0,0.3);
+  color:#c8b880;font-family:'SimSun',serif;font-size:0.9em;line-height:1.8;
+}
+.status-panel h3{color:#e0c870;font-size:1.05em;margin-bottom:4px}
+.status-panel hr{border:none;border-top:1px solid #2e2010;margin:10px 0}
+.status-panel .label{color:#907850;font-size:0.85em}
+.status-panel .value{color:#e0c870;font-weight:bold}
+.status-panel ul{list-style:none;padding-left:0}
+.status-panel li::before{content:"• ";color:#6a4812}
+
+/* ── 加载指示器 ────────────────────────────────────────── */
+.loading{display:none;text-align:center;padding:16px;color:#c8a858;letter-spacing:2px}
+.loading.active{display:block}
+.loading .dots::after{content:'';animation:dots 1.4s steps(4,end) infinite}
+@keyframes dots{0%{content:''}25%{content:'.'}50%{content:'..'}75%{content:'...'}}
+
+/* ── 响应式 ────────────────────────────────────────────── */
+@media(max-width:768px){
+  .main-layout{flex-direction:column}
+  .status-col{order:-1}
+  .story-box{min-height:360px;max-height:460px;padding:18px 20px}
+}
+</style>
+</head>
+<body>
+
+<!-- ── 标题 ──────────────────────────────────────────────── -->
+<div class="app-header">
+  <h1>饿殍 · 明末千里行</h1>
+  <p>StoryWeaver&nbsp;·&nbsp;LangGraph 多 Agent AI 文字冒险&nbsp;·&nbsp;COMP5423 NLP Project</p>
+</div>
+
+<div class="container">
+<div class="main-layout">
+
+  <!-- ── 左：故事区 ──────────────────────────────────────── -->
+  <div class="story-col">
+    <div class="story-box" id="storyBox">
+      <div class="empty-hint">
+        崇祯十四年，天下大乱<br>
+        点击「⚔ 开始新游戏」踏上旅途<br>
+        <span style="font-size:0.7em;color:#3a2c10;letter-spacing:1px;">StoryWeaver · AI 文字冒险</span>
+      </div>
+    </div>
+
+    <!-- 加载指示器 -->
+    <div class="loading" id="loading">正在生成叙事<span class="dots"></span></div>
+
+    <!-- 选项按钮 -->
+    <div class="choice-label">选择你的行动：</div>
+    <div class="choice-row">
+      <button class="choice-btn" id="btn1" style="display:none" onclick="handleChoice(this.textContent)"></button>
+      <button class="choice-btn" id="btn2" style="display:none" onclick="handleChoice(this.textContent)"></button>
+    </div>
+    <div class="choice-row">
+      <button class="choice-btn" id="btn3" style="display:none" onclick="handleChoice(this.textContent)"></button>
+      <button class="choice-btn" id="btn4" style="display:none" onclick="handleChoice(this.textContent)"></button>
+    </div>
+
+    <!-- 自由输入 -->
+    <div class="choice-label" style="margin-top:14px">自由行动：</div>
+    <div class="free-input-row">
+      <input class="free-input" id="freeInput" type="text" placeholder="输入你的行动……" disabled>
+      <button class="submit-btn" id="submitBtn" onclick="handleFreeInput()" disabled>确认</button>
+    </div>
+  </div>
+
+  <!-- ── 右：状态面板 ────────────────────────────────────── -->
+  <div class="status-col">
+    <button class="new-game-btn" id="newGameBtn" onclick="handleNewGame()">⚔ 开始新游戏</button>
+    <hr style="border-color:#3a2510;margin:12px 0 8px">
+    <div class="status-panel" id="statusPanel">
+      <p style="color:#907850;font-style:italic">准备开始旅途……</p>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<script>
+// ── 游戏状态 ──────────────────────────────────────────────
+let gameState = null;
+let storyTurns = [];
+
+const API_BASE = '/api';
+
+// ── DOM 元素 ──────────────────────────────────────────────
+const storyBox   = document.getElementById('storyBox');
+const loading    = document.getElementById('loading');
+const statusPanel= document.getElementById('statusPanel');
+const newGameBtn = document.getElementById('newGameBtn');
+const freeInput  = document.getElementById('freeInput');
+const submitBtn  = document.getElementById('submitBtn');
+const btns       = [document.getElementById('btn1'), document.getElementById('btn2'),
+                    document.getElementById('btn3'), document.getElementById('btn4')];
+
+// ── 工具函数 ──────────────────────────────────────────────
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+function setButtonsDisabled(disabled) {
+  btns.forEach(b => b.disabled = disabled);
+  submitBtn.disabled = disabled;
+  freeInput.disabled = disabled;
+  newGameBtn.disabled = disabled;
+}
+
+function updateChoiceButtons(choices) {
+  choices = choices || [];
+  btns.forEach((btn, i) => {
+    if (i < choices.length) {
+      btn.textContent = choices[i];
+      btn.style.display = '';
+    } else {
+      btn.style.display = 'none';
+    }
+  });
+}
+
+function formatTurn(playerAction, result) {
+  let html = '';
+  if (playerAction) {
+    html += '<div class="player-action">▶ ' + escapeHtml(playerAction) + '</div>';
+  }
+
+  const narration = (result.narration || '').replace(/\n/g, '<br>');
+  html += '<div class="narration-block">' + narration + '</div>';
+
+  const dlg = result.dialogue || {};
+  if (dlg.text) {
+    const speaker = dlg.speaker || '';
+    const text = dlg.text.replace(/\n/g, '<br>');
+    if (speaker) {
+      html += '<div class="dialogue-line"><span class="speaker-name">【' + escapeHtml(speaker) + '】</span>「' + text + '」</div>';
+    } else {
+      html += '<div class="dialogue-line">「' + text + '」</div>';
+    }
+  }
+
+  const frag = result.backstory_fragment || '';
+  if (frag) {
+    const fragHtml = frag.replace(/\n/g, '<br>');
+    html += '<div class="backstory-block"><span style="color:#9878c8;font-size:0.8em;letter-spacing:4px;">✦ 往事碎忆 ✦</span><br>' + fragHtml + '</div>';
+  }
+
+  if (!result.consistency_passed && result.repair_suggestion) {
+    html += '<div class="repair-note">⚠ ' + escapeHtml(result.repair_suggestion) + '</div>';
+  }
+
+  html += '<hr class="turn-divider">';
+  return html;
+}
+
+function renderStory() {
+  if (storyTurns.length > 0) {
+    storyBox.innerHTML = storyTurns.join('');
+    // 自动滚动到底部
+    setTimeout(() => { storyBox.scrollTop = storyBox.scrollHeight; }, 80);
+  } else {
+    storyBox.innerHTML = '<div class="empty-hint">崇祯十四年，天下大乱<br>点击「⚔ 开始新游戏」踏上旅途<br><span style="font-size:0.7em;color:#3a2c10;letter-spacing:1px;">StoryWeaver · AI 文字冒险</span></div>';
+  }
+}
+
+function renderStatus(state) {
+  if (!state) {
+    statusPanel.innerHTML = '<p style="color:#907850;font-style:italic">准备开始旅途……</p>';
+    return;
+  }
+
+  const relation  = state.companion_relation || 0;
+  const rep       = state.reputation || 0;
+  const silver    = state.silver || 0;
+  const inventory = state.inventory || [];
+  const location  = state.player_location || '';
+  const backstory = state.revealed_backstory || [];
+  const flags     = state.plot_flags || {};
+  const turnId    = state.turn_id || 0;
+  const act       = state.current_act || 1;
+
+  const filled   = Math.floor(relation / 10);
+  const bar      = '🟥'.repeat(filled) + '⬛'.repeat(10 - filled);
+  const repText  = rep > 0 ? '+' + rep : String(rep);
+  const actNames = {1:'华州', 2:'阌乡', 3:'崤山', 4:'洛阳'};
+
+  let html = '';
+  html += '<h3>📍 ' + escapeHtml(location) + '</h3>';
+  html += '<p class="label">第 ' + act + ' 幕 · ' + (actNames[act]||'?') + ' · 第 ' + turnId + ' 回合</p>';
+  html += '<hr>';
+  html += '<p><strong>穗的信任度</strong></p>';
+  html += '<p>' + bar + '  <code>' + relation + '/100</code></p>';
+  html += '<p><strong>名声</strong> <code>' + repText + '</code>　　<strong>铜钱</strong> <code>' + silver + ' 文</code></p>';
+  html += '<hr>';
+  html += '<p><strong>背包</strong></p><ul>';
+  if (inventory.length > 0) {
+    inventory.forEach(item => { html += '<li>' + escapeHtml(item) + '</li>'; });
+  } else {
+    html += '<li><em>空</em></li>';
+  }
+  html += '</ul>';
+
+  if (backstory.length > 0) {
+    html += '<hr><p><strong>📖 已知线索</strong> <em>(' + backstory.length + ' 条)</em></p><ul>';
+    backstory.slice(-3).forEach(b => {
+      const snippet = b.length > 24 ? b.slice(0, 24) + '…' : b;
+      html += '<li>' + escapeHtml(snippet) + '</li>';
+    });
+    html += '</ul>';
+  }
+
+  const flagLabels = {
+    saved_refugee:   '✅ 救助过难民',
+    betrayed_trust:  '❌ 曾欺骗穗',
+    joined_rebels:   '✅ 与义军合作',
+    revealed_secret: '✅ 揭露委托真相',
+    sacrificed_self: '✅ 挺身而出',
+    knows_pig_demon: '⚠️ 知晓豚妖',
+  };
+  const active = Object.keys(flagLabels).filter(k => flags[k]).map(k => flagLabels[k]);
+  if (active.length > 0) {
+    html += '<hr><p><strong>⚑ 命运选择</strong></p><ul>';
+    active.forEach(f => { html += '<li>' + f + '</li>'; });
+    html += '</ul>';
+  }
+
+  statusPanel.innerHTML = html;
+}
+
+// ── API 调用 ──────────────────────────────────────────────
+async function handleNewGame() {
+  setButtonsDisabled(true);
+  loading.classList.add('active');
+  storyTurns = [];
+  gameState = null;
+
+  try {
+    const resp = await fetch(API_BASE + '/new_game', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({})
+    });
+    const data = await resp.json();
+
+    if (data.error) {
+      alert('错误：' + data.error);
+      return;
+    }
+
+    gameState = data.state;
+    const result = data.result;
+
+    storyTurns.push('<div class="act-title">═══ 第一幕 · 华州 ═══</div>');
+    storyTurns.push(formatTurn('', result));
+
+    renderStory();
+    renderStatus(gameState);
+    updateChoiceButtons(result.next_choices || []);
+    freeInput.value = '';
+  } catch (e) {
+    alert('网络错误：' + e.message);
+  } finally {
+    loading.classList.remove('active');
+    setButtonsDisabled(false);
+  }
+}
+
+async function handleChoice(choiceText) {
+  if (!choiceText || !gameState) return;
+
+  setButtonsDisabled(true);
+  loading.classList.add('active');
+
+  try {
+    const resp = await fetch(API_BASE + '/step', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ player_input: choiceText, state: gameState })
+    });
+    const data = await resp.json();
+
+    if (data.error) {
+      alert('错误：' + data.error);
+      return;
+    }
+
+    gameState = data.state;
+    const result = data.result;
+
+    // 检查是否有新地点 → 显示幕次标题
+    const delta = result.state_delta || {};
+    if (delta.new_location && gameState) {
+      const actNumber = gameState.current_act || 1;
+      const actNames = {1:'华州', 2:'阌乡', 3:'崤山', 4:'洛阳'};
+      storyTurns.push('<div class="act-title">═══ 第' + actNumber + '幕 · ' + (actNames[actNumber]||'') + ' ═══</div>');
+    }
+
+    storyTurns.push(formatTurn(choiceText, result));
+    renderStory();
+    renderStatus(gameState);
+    updateChoiceButtons(result.next_choices || []);
+    freeInput.value = '';
+  } catch (e) {
+    alert('网络错误：' + e.message);
+  } finally {
+    loading.classList.remove('active');
+    setButtonsDisabled(false);
+  }
+}
+
+function handleFreeInput() {
+  const text = freeInput.value.trim();
+  if (text) handleChoice(text);
+}
+
+// ── 回车提交 ──────────────────────────────────────────────
+freeInput.addEventListener('keydown', function(e) {
+  if (e.key === 'Enter' && !e.isComposing) {
+    e.preventDefault();
+    handleFreeInput();
+  }
+});
+</script>
+</body>
+</html>

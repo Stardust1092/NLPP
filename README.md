@@ -127,6 +127,65 @@ python evaluation/run_eval.py
 
 ---
 
+## ☁️ Vercel 部署
+
+项目已配置好 Vercel 部署支持，使用 Python Serverless Functions 作为后端 API，静态 HTML 作为前端。
+
+### 部署步骤
+
+1. **安装 Vercel CLI**
+
+```bash
+npm i -g vercel
+```
+
+2. **登录 Vercel**
+
+```bash
+vercel login
+```
+
+3. **配置环境变量**
+
+在 [Vercel 控制台](https://vercel.com) 项目设置中添加以下环境变量：
+
+| 变量名 | 说明 | 示例 |
+|--------|------|------|
+| `DEEPSEEK_API_KEY` | DeepSeek API 密钥（**必填**） | `sk-xxxxxxxxxxxx` |
+| `DEEPSEEK_BASE_URL` | API 端点（可选） | `https://api.deepseek.com` |
+| `DEEPSEEK_MODEL` | 模型名称（可选） | `deepseek-chat` |
+
+也可通过 CLI 添加：
+```bash
+vercel env add DEEPSEEK_API_KEY
+```
+
+4. **部署**
+
+```bash
+# 预览部署
+vercel
+
+# 生产部署
+vercel --prod
+```
+
+### 架构说明
+
+| 组件 | 说明 |
+|------|------|
+| `vercel.json` | Vercel 部署配置（路由、函数超时等） |
+| `api/new_game.py` | Serverless Function — 初始化新游戏 |
+| `api/step.py` | Serverless Function — 处理每回合玩家输入 |
+| `public/index.html` | 静态前端（明末卷轴风 UI） |
+
+> ⚠️ **注意事项：**
+> - Vercel Free 计划 Serverless Function 最大执行时间为 10 秒，DeepSeek API 调用可能超时。建议使用 **Pro 计划**（60 秒超时）。
+> - 游戏状态存储在客户端浏览器中，刷新页面会丢失进度。
+> - 环境变量 `DEEPSEEK_API_KEY` 必须在 Vercel 项目设置中配置，切勿提交到代码仓库。
+
+---
+
 ## 📁 项目结构
 
 ```
@@ -171,7 +230,15 @@ StoryWeaver/
 ├── docs/
 │   └── TECHNICAL_SPEC.md      # 大厂级技术规格说明书
 │
+├── api/                       # Vercel Serverless Functions
+│   ├── new_game.py                # 新游戏 API
+│   └── step.py                    # 游戏回合 API
+│
+├── public/                    # Vercel 静态前端
+│   └── index.html                 # 游戏 UI（明末卷轴风）
+│
 ├── architecture.html          # 可视化架构图（浏览器打开）
+├── vercel.json                # Vercel 部署配置
 ├── requirements.txt
 ├── .env.example               # API Key 配置模板
 └── README.md
