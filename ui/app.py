@@ -616,10 +616,10 @@ with gr.Blocks(
     new_game_btn.click(fn=handle_new_game, outputs=_outputs)
 
     for btn in [btn1, btn2, btn3, btn4]:
-        btn.click(fn=handle_choice, inputs=[btn], outputs=_outputs, show_progress=False)
+        btn.click(fn=handle_choice, inputs=[btn], outputs=_outputs, show_progress="hidden")
 
-    submit_btn.click(fn=handle_free_input, inputs=[free_input], outputs=_outputs, show_progress=False)
-    free_input.submit(fn=handle_free_input, inputs=[free_input], outputs=_outputs, show_progress=False)
+    submit_btn.click(fn=handle_free_input, inputs=[free_input], outputs=_outputs, show_progress="hidden")
+    free_input.submit(fn=handle_free_input, inputs=[free_input], outputs=_outputs, show_progress="hidden")
 
 
 if __name__ == "__main__":
