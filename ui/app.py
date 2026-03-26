@@ -51,7 +51,26 @@ footer, .built-with { display: none !important; }
     letter-spacing: 1px;
 }
 
-/* ── 故事卷轴区 ─────────────────────────────────────── */
+/* ── 故事卷轴滚动容器（持久 wrapper，scrollTop 不重置）── */
+#story-panel {
+    height: 62vh;
+    min-height: 420px;
+    overflow-y: auto;
+    padding: 0 !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+/* 滚动条美化（挂在持久 wrapper 上）*/
+#story-panel::-webkit-scrollbar { width: 5px; }
+#story-panel::-webkit-scrollbar-track { background: #0d0804; }
+#story-panel::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #6a4012, #3a2208);
+    border-radius: 2px;
+}
+
+/* ── 故事卷轴区（视觉样式，不负责滚动）────────────────── */
 #story-box {
     font-family: 'KaiTi', 'STKaiti', 'SimSun', serif;
     line-height: 2.1;
@@ -63,22 +82,11 @@ footer, .built-with { display: none !important; }
     border-left: 4px solid #7a5018;
     border-right: 1px solid #4a3010;
     border-bottom: 1px solid #4a3010;
-    min-height: 520px;
-    max-height: 580px;
-    overflow-y: auto;
+    min-height: 100%;
     font-size: 15px;
     box-shadow:
         inset 3px 0 14px rgba(0,0,0,0.35),
         0 4px 20px rgba(0,0,0,0.5);
-    scroll-behavior: smooth;
-}
-
-/* 滚动条美化 */
-#story-box::-webkit-scrollbar { width: 5px; }
-#story-box::-webkit-scrollbar-track { background: #0d0804; }
-#story-box::-webkit-scrollbar-thumb {
-    background: linear-gradient(180deg, #6a4012, #3a2208);
-    border-radius: 2px;
 }
 
 /* ── 叙事文本块 ─────────────────────────────────────── */
@@ -556,19 +564,11 @@ def handle_free_input(text: str):
 _AUTO_SCROLL_JS = """
 () => {
   function init() {
-    const box = document.getElementById('story-box');
-    const parent = box ? box.parentElement : null;
-    if (!parent) { setTimeout(init, 400); return; }
-    let pending = false;
+    const panel = document.getElementById('story-panel');
+    if (!panel) { setTimeout(init, 400); return; }
     new MutationObserver(() => {
-      if (pending) return;
-      pending = true;
-      requestAnimationFrame(() => {
-        const b = document.getElementById('story-box');
-        if (b) b.scrollTop = b.scrollHeight;
-        pending = false;
-      });
-    }).observe(parent, { childList: true, subtree: true });
+      panel.scrollTop = panel.scrollHeight;
+    }).observe(panel, { childList: true, subtree: true });
   }
   init();
 }
@@ -593,7 +593,7 @@ with gr.Blocks(
 
         # ── 左：故事区 ────────────────────────────────────────────────────
         with gr.Column(scale=3, min_width=500):
-            story_display = gr.HTML(value=_render_story([]))
+            story_display = gr.HTML(value=_render_story([]), elem_id="story-panel")
 
             # 选项按钮
             gr.HTML('<div class="choice-label">选择你的行动：</div>')
