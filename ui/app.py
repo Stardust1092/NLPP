@@ -559,9 +559,15 @@ _AUTO_SCROLL_JS = """
     const box = document.getElementById('story-box');
     const parent = box ? box.parentElement : null;
     if (!parent) { setTimeout(init, 400); return; }
+    let pending = false;
     new MutationObserver(() => {
-      const b = document.getElementById('story-box');
-      if (b) b.scrollTop = b.scrollHeight;
+      if (pending) return;
+      pending = true;
+      requestAnimationFrame(() => {
+        const b = document.getElementById('story-box');
+        if (b) b.scrollTop = b.scrollHeight;
+        pending = false;
+      });
     }).observe(parent, { childList: true, subtree: true });
   }
   init();
