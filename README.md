@@ -1,3 +1,16 @@
+---
+title: StoryWeaver 饿殍·明末千里行
+emoji: ⚔️
+colorFrom: yellow
+colorTo: red
+sdk: gradio
+sdk_version: 4.44.0
+app_file: app.py
+pinned: false
+license: mit
+python_version: "3.11"
+---
+
 # 📜 StoryWeaver — AI-Powered Text Adventure Game
 
 > **COMP5423 Natural Language Processing · Group Project · PolyU 2026**

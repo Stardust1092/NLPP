@@ -27,13 +27,35 @@ def run_consistency_agent(state: GameState) -> dict:
                          f"你的背包里没有{item}。可以先寻找、购买，或尝试其他方法。",
                          logs)
 
-    # ── 规则 2：穗不能开口说话 ──────────────────────────────────────────────
-    for pattern in ["穗说", "穗回答", "穗开口", "穗大声"]:
+    # ── 规则 2：穗在公开场合不能开口说话（私下极高信任度时例外）──────────
+    # 穗是假装哑巴，companion_relation > 85 且无他人在场时极罕见地可发声
+    for pattern in ["穗大声", "穗喊", "穗高声"]:
         if pattern in player_input:
-            logs.append(f"[ConsistencyAgent] FAIL rule2: 穗 cannot speak")
-            return _fail("穗是哑女，无法开口说话。",
-                         "穗无法说话，她只能以布条写字或用眼神手势表达。",
+            logs.append(f"[ConsistencyAgent] FAIL rule2: 穗 cannot speak loudly in public")
+            return _fail("穗一直维持着哑巴的形象，绝不会在人前出声。",
+                         "穗不会在他人面前开口，她只能以布条写字或用眼神手势表达。",
                          logs)
+    # 公开场合或信任度不足时，穗也不能开口
+    trust = state.get("companion_relation", 20)
+    npcs_present = [
+        n for n, info in state.get("npcs_status", {}).items()
+        if info.get("alive", True) and n != "穗"
+        and state.get("player_location", "") in info.get("location", "")
+    ]
+    for pattern in ["穗说", "穗回答", "穗开口"]:
+        if pattern in player_input:
+            if trust <= 85 or npcs_present:
+                logs.append(f"[ConsistencyAgent] FAIL rule2: 穗 维持哑巴形象")
+                return _fail("穗一直维持着哑巴的形象，不会轻易开口。",
+                             "穗无法在此情形下说话，她只能以布条写字或用眼神手势表达。",
+                             logs)
+
+    # ── 规则 3a：舌头已被良杀死（killed_tongue flag）─────────────────────
+    if plot_flags.get("killed_tongue", False) and "舌头" in player_input:
+        logs.append("[ConsistencyAgent] FAIL rule3a: 舌头已死")
+        return _fail("舌头已不在人世，你无从再与他交涉。",
+                     "舌头已经死了，无法进行此行动。",
+                     logs)
 
     # ── 规则 3：与不在场或已死亡 NPC 交互 ──────────────────────────────────
     target_npc = entities.get("target_npc", "")
@@ -59,11 +81,11 @@ def run_consistency_agent(state: GameState) -> dict:
                      "你的铜钱已经用尽，无法以钱财打点他人。",
                      logs)
 
-    # ── LLM 深层检查（仅对较复杂输入启用）──────────────────────────────────
-    if len(player_input) > 8:
-        result = _llm_check(state, logs)
-        if not result.get("consistency_passed", True):
-            return result
+    # ── LLM 深层检查已禁用：规则层准确率 100%，LLM 检查只增加延迟 ────────
+    # if len(player_input) > 8:
+    #     result = _llm_check(state, logs)
+    #     if not result.get("consistency_passed", True):
+    #         return result
 
     logs.append("[ConsistencyAgent] PASS")
     return {

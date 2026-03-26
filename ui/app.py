@@ -161,6 +161,58 @@ footer, .built-with { display: none !important; }
     margin: 18px 0;
 }
 
+/* ── 加载动画 ────────────────────────────────────────── */
+.loading-block {
+    color: #7a6030;
+    font-style: italic;
+    letter-spacing: 0.1em;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+}
+.spinner {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border: 2px solid #3a2c10;
+    border-top-color: #c8a040;
+    border-radius: 50%;
+    animation: spin 0.9s linear infinite;
+    flex-shrink: 0;
+}
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ── 打字机动画 ──────────────────────────────────────── */
+@keyframes typing {
+    from { width: 0; }
+    to   { width: 100%; }
+}
+.typewriter {
+    overflow: hidden;
+    white-space: normal;
+    animation: fadeIn 0.4s ease-in;
+}
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+.dialogue-line.typewriter {
+    animation: fadeIn 0.6s ease-in;
+}
+.backstory-block.typewriter {
+    animation: fadeIn 0.8s ease-in;
+}
+
+/* ── 按钮禁用状态 ────────────────────────────────────── */
+.choice-btn > button:disabled {
+    opacity: 0.35 !important;
+    cursor: not-allowed !important;
+    transform: none !important;
+}
+
 /* ── 空状态占位 ─────────────────────────────────────── */
 .empty-hint {
     color: #c8a858;
@@ -277,13 +329,15 @@ footer, .built-with { display: none !important; }
 
 # ── HTML 格式化工具 ────────────────────────────────────────────────────────────
 
-def _format_turn(player_action: str, result: dict) -> str:
+def _format_turn(player_action: str, result: dict, animate: bool = False) -> str:
+    """格式化一个回合的 HTML。animate=True 时叙事文本带入场动画。"""
+    anim = " typewriter" if animate else ""
     html = ""
     if player_action:
         html += f'<div class="player-action">▶ {player_action}</div>'
 
     narration = result.get("narration", "").replace("\n", "<br>")
-    html += f'<div class="narration-block">{narration}</div>'
+    html += f'<div class="narration-block{anim}">{narration}</div>'
 
     dlg = result.get("dialogue") or {}
     if dlg.get("text"):
@@ -291,18 +345,18 @@ def _format_turn(player_action: str, result: dict) -> str:
         text = dlg["text"].replace("\n", "<br>")
         if spk:
             html += (
-                f'<div class="dialogue-line">'
+                f'<div class="dialogue-line{anim}">'
                 f'<span class="speaker-name">【{spk}】</span>「{text}」'
                 f'</div>'
             )
         else:
-            html += f'<div class="dialogue-line">「{text}」</div>'
+            html += f'<div class="dialogue-line{anim}">「{text}」</div>'
 
     frag = result.get("backstory_fragment", "")
     if frag:
         frag_html = frag.replace("\n", "<br>")
         html += (
-            f'<div class="backstory-block">'
+            f'<div class="backstory-block{anim}">'
             f'<span style="color:#9878c8;font-size:0.8em;letter-spacing:4px;">'
             f'✦ 往事碎忆 ✦</span><br>{frag_html}'
             f'</div>'
@@ -314,6 +368,33 @@ def _format_turn(player_action: str, result: dict) -> str:
             html += f'<div class="repair-note">⚠ {hint}</div>'
 
     html += '<hr class="turn-divider">'
+    return html
+
+
+def _loading_turn(player_action: str) -> str:
+    """玩家点击后立即显示的加载占位块。"""
+    return (
+        f'<div class="player-action">▶ {player_action}</div>'
+        f'<div class="loading-block">'
+        f'<span class="spinner"></span>'
+        f'<span>旅途延续中……</span>'
+        f'</div>'
+    )
+
+
+def _streaming_turn(player_action: str, partial_text: str) -> str:
+    """流式输出过程中的临时块：显示已接收到的叙事文本。"""
+    html = f'<div class="player-action">▶ {player_action}</div>'
+    if partial_text:
+        safe = partial_text.replace("\n", "<br>")
+        html += f'<div class="narration-block typewriter">{safe}▌</div>'
+    else:
+        html += (
+            '<div class="loading-block">'
+            '<span class="spinner"></span>'
+            '<span>旅途延续中……</span>'
+            '</div>'
+        )
     return html
 
 
@@ -404,9 +485,9 @@ def _update_buttons(choices: list[str]):
     updates = []
     for i in range(4):
         if i < len(choices):
-            updates.append(gr.update(value=choices[i], visible=True))
+            updates.append(gr.update(value=choices[i], visible=True, interactive=True))
         else:
-            updates.append(gr.update(value="", visible=False))
+            updates.append(gr.update(value="", visible=False, interactive=True))
     return updates
 
 
@@ -428,36 +509,65 @@ def handle_new_game():
 
 
 def handle_choice(choice_text: str):
+    """Generator：流式输出叙事文本，最后刷新选项与状态面板。"""
     global _story_turns
     if not choice_text or session.get_state() is None:
-        return [gr.update()] * 7
+        yield [gr.update()] * 7
+        return
 
-    result = session.step(choice_text)
-    state  = session.get_state()
+    # ── 第一帧：立即禁用按钮，显示加载占位 ────────────────────────────────
+    loading_turns = _story_turns + [_loading_turn(choice_text)]
+    disabled_btn  = gr.update(interactive=False)
+    yield [_render_story(loading_turns), gr.update(),
+           disabled_btn, disabled_btn, disabled_btn, disabled_btn, ""]
 
-    if state and result.get("state_delta", {}).get("new_location"):
+    # ── 流式接收叙事文本，每到一个 chunk 刷新故事区 ───────────────────────
+    partial_narration = ""
+    final_result      = None
+
+    for event in session.stream_step(choice_text):
+        if event["type"] == "chunk":
+            partial_narration += event["text"]
+            streaming_turns = _story_turns + [_streaming_turn(choice_text, partial_narration)]
+            yield [_render_story(streaming_turns), gr.update(),
+                   disabled_btn, disabled_btn, disabled_btn, disabled_btn, ""]
+        elif event["type"] == "final":
+            final_result = event["result"]
+
+    if final_result is None:
+        yield [gr.update()] * 7
+        return
+
+    # ── 最终帧：写入完整回合（对话、选项、状态面板）────────────────────────
+    state = session.get_state()
+    if state and final_result.get("state_delta", {}).get("new_location"):
         act    = state.get("current_act", 1)
-        titles = {1: "华州", 2: "阌乡", 3: "崤山", 4: "洛阳"}
+        titles = {1: "华州", 2: "潼关/阌乡", 3: "陕州/解州", 4: "洛阳"}
         act_title = f'<div class="act-title">═══ 第{act}幕 · {titles.get(act,"")} ═══</div>'
         _story_turns.append(act_title)
 
-    _story_turns.append(_format_turn(choice_text, result))
-
+    # 流式已完成动画效果，animate=False 避免重复渲染
+    _story_turns.append(_format_turn(choice_text, final_result, animate=False))
     story_html  = _render_story(_story_turns)
     status_md   = _format_status(state)
-    btn_updates = _update_buttons(result.get("next_choices", []))
-    return [story_html, status_md] + btn_updates + [""]
+    btn_updates = _update_buttons(final_result.get("next_choices", []))
+    yield [story_html, status_md] + btn_updates + [""]
 
 
 def handle_free_input(text: str):
     if not text.strip():
-        return [gr.update()] * 7
-    return handle_choice(text.strip())
+        yield [gr.update()] * 7
+        return
+    yield from handle_choice(text.strip())
 
 
 # ── 构建 Gradio 应用 ──────────────────────────────────────────────────────────
 
-with gr.Blocks(title="StoryWeaver · 明末千里行") as demo:
+with gr.Blocks(
+    title="StoryWeaver · 明末千里行",
+    css=CUSTOM_CSS,
+    theme=gr.themes.Base(primary_hue="orange", neutral_hue="stone"),
+) as demo:
 
     # ── 标题 ────────────────────────────────────────────────────────────────
     gr.HTML("""
@@ -506,19 +616,11 @@ with gr.Blocks(title="StoryWeaver · 明末千里行") as demo:
     new_game_btn.click(fn=handle_new_game, outputs=_outputs)
 
     for btn in [btn1, btn2, btn3, btn4]:
-        btn.click(fn=handle_choice, inputs=[btn], outputs=_outputs)
+        btn.click(fn=handle_choice, inputs=[btn], outputs=_outputs, show_progress=False)
 
-    submit_btn.click(fn=handle_free_input, inputs=[free_input], outputs=_outputs)
-    free_input.submit(fn=handle_free_input, inputs=[free_input], outputs=_outputs)
+    submit_btn.click(fn=handle_free_input, inputs=[free_input], outputs=_outputs, show_progress=False)
+    free_input.submit(fn=handle_free_input, inputs=[free_input], outputs=_outputs, show_progress=False)
 
 
 if __name__ == "__main__":
-    demo.launch(
-        server_port=7860,
-        share=False,
-        css=CUSTOM_CSS,
-        theme=gr.themes.Base(
-            primary_hue="orange",
-            neutral_hue="stone",
-        ),
-    )
+    demo.launch(server_port=7860, share=False)

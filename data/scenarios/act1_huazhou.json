@@ -1,7 +1,7 @@
 {
   "act": 1,
   "title": "第一幕·华州",
-  "opening_narration": "崇祯十四年，盛夏。\n\n华州城外，旱土龟裂，连野狗都瘦得皮包骨。流民潮水般从四面涌来，却哪里也去不了——前路断绝，后路已毁。\n\n你是良，一个靠接活计维生的刀客。三日前，一个面色阴郁的中年人付了定金，托你护送四名女童从华州到洛阳，不问原由，只要平安送到。\n\n如今，你站在城郊一间破旧客栈里，打量着眼前的四个孩子。\n\n花儿七岁，还懂得挤出笑；月儿六岁，已经哭哑了嗓子；冬梅八岁，眼神空洞，像是魂儿已经不在了。\n\n还有穗——九岁，最小，却最不寻常。她不哭，不闹，只静静看着你，眼神深邃得不像个孩子。\n\n她是个哑女。",
+  "opening_narration": "天启年间，陕西大旱，民变四起。\n\n华州城外，旱土龟裂，连野狗都瘦得皮包骨。流民潮水般从四面涌来，却哪里也去不了——前路断绝，后路已毁。\n\n你是良，一个靠杀人夺货维生的盗匪。三日前，牙人尹三付了定金，托你和舌头护送四名女童从华州到洛阳，不问原由，只要平安送到。\n\n如今，你站在城郊一间破旧客栈里，打量着眼前的四个孩子。\n\n红儿七岁，还懂得挤出笑；翠儿六岁，已经哭哑了嗓子；琼华八岁，眼神空洞，像是魂儿已经不在了。\n\n还有穗——九岁，最小，却最不寻常。她不哭，不闹，只静静看着你，眼神深邃得不像个孩子。\n\n她是个哑女。",
   "initial_state": {
     "player_name": "良",
     "current_act": 1,
@@ -12,22 +12,27 @@
     "inventory": ["干粮×2", "委托书"],
     "npcs_status": {
       "穗":   {"alive": true, "location": "华州·破旧客栈", "relation": 20, "revealed_info": []},
-      "花儿": {"alive": true, "location": "华州·破旧客栈", "relation": 30, "revealed_info": []},
-      "月儿": {"alive": true, "location": "华州·破旧客栈", "relation": 30, "revealed_info": []},
-      "冬梅": {"alive": true, "location": "华州·破旧客栈", "relation": 20, "revealed_info": []},
-      "舌头": {"alive": true, "location": "华州·破旧客栈", "relation": 70, "revealed_info": []}
+      "红儿": {"alive": true, "location": "华州·破旧客栈", "relation": 30, "revealed_info": []},
+      "翠儿": {"alive": true, "location": "华州·破旧客栈", "relation": 30, "revealed_info": []},
+      "琼华": {"alive": true, "location": "华州·破旧客栈", "relation": 20, "revealed_info": []},
+      "舌头": {"alive": true, "location": "华州·破旧客栈", "relation": 70, "revealed_info": []},
+      "尹三": {"alive": true, "location": "华州",           "relation": 10, "revealed_info": []}
     },
     "locations_visited": ["华州", "华州·破旧客栈"],
     "plot_flags": {
-      "accepted_mission":  true,
-      "knows_true_buyer":  false,
-      "knows_pig_demon":   false,
-      "saved_refugee":     false,
-      "betrayed_trust":    false,
-      "joined_rebels":     false,
-      "revealed_secret":   false,
-      "sacrificed_self":   false,
-      "sui_revealed_plan": false
+      "accepted_mission":       true,
+      "knows_true_buyer":       false,
+      "knows_pig_demon":        false,
+      "knows_sui_is_spy":       false,
+      "knows_sui_father_truth": false,
+      "killed_tongue":          false,
+      "found_haobao":           false,
+      "saved_refugee":          false,
+      "betrayed_trust":         false,
+      "joined_rebels":          false,
+      "revealed_secret":        false,
+      "sacrificed_self":        false,
+      "sui_revealed_plan":      false
     },
     "revealed_backstory": []
   },
