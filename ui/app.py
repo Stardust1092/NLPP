@@ -401,16 +401,6 @@ def _streaming_turn(player_action: str, partial_text: str) -> str:
 def _render_story(turns: list[str]) -> str:
     if turns:
         inner = "".join(turns)
-        # 自动滚动到底部的 JS
-        scroll_js = (
-            '<script>'
-            'setTimeout(()=>{'
-            'const b=document.getElementById("story-box");'
-            'if(b)b.scrollTop=b.scrollHeight;'
-            '},80);'
-            '</script>'
-        )
-        inner += scroll_js
     else:
         inner = (
             '<div class="empty-hint">'
@@ -563,10 +553,26 @@ def handle_free_input(text: str):
 
 # ── 构建 Gradio 应用 ──────────────────────────────────────────────────────────
 
+_AUTO_SCROLL_JS = """
+() => {
+  function init() {
+    const box = document.getElementById('story-box');
+    const parent = box ? box.parentElement : null;
+    if (!parent) { setTimeout(init, 400); return; }
+    new MutationObserver(() => {
+      const b = document.getElementById('story-box');
+      if (b) b.scrollTop = b.scrollHeight;
+    }).observe(parent, { childList: true, subtree: true });
+  }
+  init();
+}
+"""
+
 with gr.Blocks(
     title="StoryWeaver · 明末千里行",
     css=CUSTOM_CSS,
     theme=gr.themes.Base(primary_hue="orange", neutral_hue="stone"),
+    js=_AUTO_SCROLL_JS,
 ) as demo:
 
     # ── 标题 ────────────────────────────────────────────────────────────────
